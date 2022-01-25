@@ -1,6 +1,7 @@
 package spring.example.beerclient.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -17,7 +18,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Autowired
     public RequestServiceImpl(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8080/api/v1").build();
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8888/api/v1").build();
     }
 
     @Override
@@ -37,11 +38,34 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public Mono<BeerDTO> beerById(String id, Boolean showInventoryOnHand) {
 
-        //return webClient.get().uri("/beer/{id}", id).retrieve().bodyToMono(BeerDTO.class);
         return webClient.get().uri(
                 uriBuilder -> uriBuilder.path("/beer/{id}")
                 .queryParamIfPresent("showInventoryOnHand", Optional.ofNullable(showInventoryOnHand))
                 .build(id)
         ).retrieve().bodyToMono(BeerDTO.class);
+    }
+
+    @Override
+    public Mono<BeerDTO> beerByUpc(String upc) {
+
+        return webClient.get().uri("/beerUpc/{upc}", upc).retrieve().bodyToMono(BeerDTO.class);
+    }
+
+    @Override
+    public Mono<ResponseEntity> addBeer(BeerDTO body) {
+
+        return webClient.post().uri("/beer").bodyValue(body).retrieve().bodyToMono(ResponseEntity.class);
+    }
+
+    @Override
+    public Mono<ResponseEntity> updateBeer(String id, BeerDTO body) {
+
+        return webClient.put().uri("/beer/{id}", id).bodyValue(body).retrieve().bodyToMono(ResponseEntity.class);
+    }
+
+    @Override
+    public Mono<ResponseEntity> deleteBeer(String id) {
+
+        return webClient.delete().uri("/beer/{id}", id).retrieve().bodyToMono(ResponseEntity.class);
     }
 }

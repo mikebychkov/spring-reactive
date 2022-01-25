@@ -3,6 +3,8 @@ package spring.example.beerclient.dto;
 import lombok.Data;
 import lombok.NonNull;
 
+import java.time.LocalDateTime;
+
 @Data
 public class BeerDTO {
 
@@ -18,13 +20,13 @@ public class BeerDTO {
     private Integer quantityOnHand;
 
     @NonNull
-    private String price;
+    private Double price;
 
     private String id;
 
     private Integer version;
 
-    private String createdDate;
+    private LocalDateTime createdDate;
 
-    private String lastModifiedDate;
+    private LocalDateTime lastModifiedDate;
 }

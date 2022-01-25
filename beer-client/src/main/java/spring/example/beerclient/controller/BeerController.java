@@ -1,6 +1,8 @@
 package spring.example.beerclient.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import spring.example.beerclient.dto.BeerDTO;
@@ -30,5 +32,29 @@ public class BeerController {
                                   @RequestParam(defaultValue = "false", required = false) Boolean showInventoryOnHand) {
 
         return requestService.beerById(id, showInventoryOnHand);
+    }
+
+    @GetMapping("by-upc/{upc}")
+    public Mono<BeerDTO> beerByUpc(@PathVariable String upc) {
+
+        return requestService.beerByUpc(upc);
+    }
+
+    @PostMapping
+    public Mono<ResponseEntity> addBeer(@RequestBody @Validated BeerDTO body) {
+
+        return requestService.addBeer(body);
+    }
+
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity> updateBeer(@PathVariable String id, @RequestBody @Validated BeerDTO body) {
+
+        return requestService.updateBeer(id, body);
+    }
+
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity> deleteBeer(@PathVariable String id) {
+
+        return requestService.deleteBeer(id);
     }
 }
