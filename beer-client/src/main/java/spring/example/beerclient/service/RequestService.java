@@ -14,9 +14,9 @@ public interface RequestService {
 
     Mono<BeerDTO> beerByUpc(String upc);
 
-    Mono<ResponseEntity> addBeer(BeerDTO body);
+    Mono<ResponseEntity<Void>> addBeer(BeerDTO body);
 
-    Mono<ResponseEntity> updateBeer(String id, BeerDTO body);
+    Mono<ResponseEntity<Void>> updateBeer(String id, BeerDTO body);
 
-    Mono<ResponseEntity> deleteBeer(String id);
+    Mono<ResponseEntity<Void>> deleteBeer(String id);
 }

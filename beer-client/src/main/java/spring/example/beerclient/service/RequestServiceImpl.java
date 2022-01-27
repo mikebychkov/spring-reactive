@@ -52,20 +52,23 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public Mono<ResponseEntity> addBeer(BeerDTO body) {
+    public Mono<ResponseEntity<Void>> addBeer(BeerDTO body) {
 
-        return webClient.post().uri("/beer").bodyValue(body).retrieve().bodyToMono(ResponseEntity.class);
+        //return webClient.post().uri("/beer").bodyValue(body).retrieve().bodyToMono(ResponseEntity.class);
+        return webClient.post().uri("/beer").bodyValue(body).retrieve().toBodilessEntity();
     }
 
     @Override
-    public Mono<ResponseEntity> updateBeer(String id, BeerDTO body) {
+    public Mono<ResponseEntity<Void>> updateBeer(String id, BeerDTO body) {
 
-        return webClient.put().uri("/beer/{id}", id).bodyValue(body).retrieve().bodyToMono(ResponseEntity.class);
+        //return webClient.put().uri("/beer/{id}", id).bodyValue(body).retrieve().bodyToMono(ResponseEntity.class);
+        return webClient.put().uri("/beer/{id}", id).bodyValue(body).retrieve().toBodilessEntity();
     }
 
     @Override
-    public Mono<ResponseEntity> deleteBeer(String id) {
+    public Mono<ResponseEntity<Void>> deleteBeer(String id) {
 
-        return webClient.delete().uri("/beer/{id}", id).retrieve().bodyToMono(ResponseEntity.class);
+        //return webClient.delete().uri("/beer/{id}", id).retrieve().bodyToMono(ResponseEntity.class);
+        return webClient.delete().uri("/beer/{id}", id).retrieve().toBodilessEntity();
     }
 }

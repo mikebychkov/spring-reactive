@@ -41,19 +41,19 @@ public class BeerController {
     }
 
     @PostMapping
-    public Mono<ResponseEntity> addBeer(@RequestBody @Validated BeerDTO body) {
+    public Mono<ResponseEntity<Void>> addBeer(@RequestBody @Validated BeerDTO body) {
 
         return requestService.addBeer(body);
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity> updateBeer(@PathVariable String id, @RequestBody @Validated BeerDTO body) {
+    public Mono<ResponseEntity<Void>> updateBeer(@PathVariable String id, @RequestBody @Validated BeerDTO body) {
 
         return requestService.updateBeer(id, body);
     }
 
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity> deleteBeer(@PathVariable String id) {
+    public Mono<ResponseEntity<Void>> deleteBeer(@PathVariable String id) {
 
         return requestService.deleteBeer(id);
     }
