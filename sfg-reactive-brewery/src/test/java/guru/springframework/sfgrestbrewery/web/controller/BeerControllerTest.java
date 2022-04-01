@@ -3,26 +3,36 @@ package guru.springframework.sfgrestbrewery.web.controller;
 import guru.springframework.sfgrestbrewery.bootstrap.BeerLoader;
 import guru.springframework.sfgrestbrewery.services.BeerService;
 import guru.springframework.sfgrestbrewery.web.model.BeerDto;
+import io.r2dbc.spi.ConnectionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.test.web.reactive.server.WebTestClient;
-
-import java.util.UUID;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-@WebFluxTest(BeerController.class)
+//@WebFluxTest(BeerController.class)
+@SpringBootTest //(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@AutoConfigureWebTestClient
 class BeerControllerTest {
+
+    //public static final String BASE_URL = "http://localhost:8888";
 
     @Autowired
     WebTestClient webTestClient;
+
+//    WebTestClient webTestClient;
 
     @MockBean
     BeerService beerService;
@@ -31,6 +41,10 @@ class BeerControllerTest {
 
     @BeforeEach
     void setUp() {
+//        webTestClient = WebTestClient
+//                .bindToServer(new ReactorClientHttpConnector(HttpClient.create().wiretap(true)))
+//                .baseUrl(BASE_URL)
+//                .build();
         validBeer = BeerDto.builder()
                 .beerName("Test beer")
                 .beerStyle("PALE_ALE")
@@ -40,15 +54,15 @@ class BeerControllerTest {
 
     @Test
     void getBeerById() {
-        UUID beerId = UUID.randomUUID();
-        given(beerService.getById(any(), any())).willReturn(validBeer);
+
+        given(beerService.getById(any(), any())).willReturn(Mono.just(validBeer));
 
         webTestClient.get()
-                .uri("/api/v1/beer/" + beerId)
+                .uri("/api/v1/beer/1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(BeerDto.class)
-                .value(beerDto -> beerDto.getBeerName(), equalTo(validBeer.getBeerName()));
+                .value(BeerDto::getBeerName, equalTo(validBeer.getBeerName()));
     }
 }
