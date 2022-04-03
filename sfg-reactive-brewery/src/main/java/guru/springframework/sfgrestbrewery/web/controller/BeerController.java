@@ -32,23 +32,21 @@ public class BeerController {
                                                          @RequestParam(value = "beerStyle", required = false) BeerStyleEnum beerStyle,
                                                          @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand) {
 
-//        if (showInventoryOnHand == null) {
-//            showInventoryOnHand = false;
-//        }
-//
-//        if (pageNumber == null || pageNumber < 0){
-//            pageNumber = DEFAULT_PAGE_NUMBER;
-//        }
-//
-//        if (pageSize == null || pageSize < 1) {
-//            pageSize = DEFAULT_PAGE_SIZE;
-//        }
-//
-//        BeerPagedList beerList = beerService.listBeers(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand);
-//
-//        return ResponseEntity.ok(Mono.just(beerList));
+        if (showInventoryOnHand == null) {
+            showInventoryOnHand = false;
+        }
 
-        return ResponseEntity.ok().build();
+        if (pageNumber == null || pageNumber < 0){
+            pageNumber = DEFAULT_PAGE_NUMBER;
+        }
+
+        if (pageSize == null || pageSize < 1) {
+            pageSize = DEFAULT_PAGE_SIZE;
+        }
+
+        Mono<BeerPagedList> beerList = beerService.listBeers(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand);
+
+        return ResponseEntity.ok(beerList);
     }
 
     @GetMapping(produces = { "application/json" }, path = "beer-flux")

@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
  */
 public interface BeerService {
 
-    BeerPagedList listBeers(String beerName, BeerStyleEnum beerStyle, PageRequest pageRequest, Boolean showInventoryOnHand);
+    Mono<BeerPagedList> listBeers(String beerName, BeerStyleEnum beerStyle, PageRequest pageRequest, Boolean showInventoryOnHand);
 
     Flux<BeerDto> listBeersFlux(String beerName, BeerStyleEnum beerStyle, Pageable pageable, Boolean showInventoryOnHand);
 
