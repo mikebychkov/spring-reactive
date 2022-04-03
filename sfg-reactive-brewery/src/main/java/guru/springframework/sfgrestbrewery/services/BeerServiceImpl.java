@@ -2,6 +2,7 @@ package guru.springframework.sfgrestbrewery.services;
 
 import guru.springframework.sfgrestbrewery.domain.Beer;
 import guru.springframework.sfgrestbrewery.repositories.BeerRepository;
+import guru.springframework.sfgrestbrewery.web.controller.NotFoundException;
 import guru.springframework.sfgrestbrewery.web.mappers.BeerMapper;
 import guru.springframework.sfgrestbrewery.web.model.BeerDto;
 import guru.springframework.sfgrestbrewery.web.model.BeerPagedList;
@@ -104,24 +105,22 @@ public class BeerServiceImpl implements BeerService {
     }
 
     @Override
-    public BeerDto saveNewBeer(BeerDto beerDto) {
+    public Mono<BeerDto> saveNewBeer(BeerDto beerDto) {
 
-//        return beerMapper.beerToBeerDto(beerRepository.save(beerMapper.beerDtoToBeer(beerDto)));
-        return null;
+        return beerRepository.save(beerMapper.beerDtoToBeer(beerDto)).map(beerMapper::beerToBeerDto);
     }
 
     @Override
-    public BeerDto updateBeer(Long beerId, BeerDto beerDto) {
+    public Mono<BeerDto> updateBeer(Long beerId, BeerDto beerDto) {
 
-//        Beer beer = beerRepository.findById(beerId).orElseThrow(NotFoundException::new);
-//
-//        beer.setBeerName(beerDto.getBeerName());
-//        beer.setBeerStyle(BeerStyleEnum.PILSNER.valueOf(beerDto.getBeerStyle()));
-//        beer.setPrice(beerDto.getPrice());
-//        beer.setUpc(beerDto.getUpc());
-//
-//        return beerMapper.beerToBeerDto(beerRepository.save(beer));
-        return null;
+        Beer beer = beerRepository.findById(beerId).blockOptional().orElseThrow(NotFoundException::new);
+
+        beer.setBeerName(beerDto.getBeerName());
+        beer.setBeerStyle(BeerStyleEnum.PILSNER.valueOf(beerDto.getBeerStyle()));
+        beer.setPrice(beerDto.getPrice());
+        beer.setUpc(beerDto.getUpc());
+
+        return beerRepository.save(beer).map(beerMapper::beerToBeerDto);
     }
 
     @Cacheable(cacheNames = "beerUpcCache")

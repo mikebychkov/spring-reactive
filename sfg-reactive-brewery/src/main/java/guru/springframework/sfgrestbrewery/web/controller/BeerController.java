@@ -80,15 +80,15 @@ public class BeerController {
     @PostMapping(path = "beer")
     public ResponseEntity<Mono<BeerDto>> saveNewBeer(@RequestBody @Validated BeerDto beerDto) {
 
-        BeerDto savedBeer = beerService.saveNewBeer(beerDto);
+        Mono<BeerDto> savedBeer = beerService.saveNewBeer(beerDto);
 
-        return ResponseEntity.ok(Mono.just(savedBeer));
+        return ResponseEntity.ok(savedBeer);
     }
 
     @PutMapping("beer/{beerId}")
     public ResponseEntity<Void> updateBeerById(@PathVariable("beerId") Long beerId, @RequestBody @Validated BeerDto beerDto) {
 
-        // TODO
+        beerService.updateBeer(beerId, beerDto);
 
         return ResponseEntity.noContent().build();
     }
