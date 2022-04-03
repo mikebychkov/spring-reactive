@@ -2,9 +2,12 @@ package spring.example.beerclient.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 import spring.example.beerclient.dto.BeerDTO;
 import spring.example.beerclient.dto.BeerListDTO;
 import spring.example.beerclient.dto.BeerStyle;
@@ -18,7 +21,9 @@ public class RequestServiceImpl implements RequestService {
 
     @Autowired
     public RequestServiceImpl(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8888/api/v1").build();
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8888/api/v1")
+                .clientConnector(new ReactorClientHttpConnector(HttpClient.create().wiretap(true)))
+                .build();
     }
 
     @Override
@@ -33,6 +38,20 @@ public class RequestServiceImpl implements RequestService {
                     .queryParam("showInventoryOnHand", showInventoryOnHand)
                     .build()
         ).retrieve().bodyToMono(BeerListDTO.class);
+    }
+
+    @Override
+    public Flux<BeerDTO> listBeersFlux(int pageNumber, int pageSize, String beerName, BeerStyle beerStyle, Boolean showInventoryOnHand) {
+
+        return webClient.get().uri(uriBuilder ->
+                uriBuilder.path("/beer-flux")
+                        .queryParam("pageNumber", pageNumber)
+                        .queryParam("pageSize", pageSize)
+                        .queryParam("beerName", beerName)
+                        .queryParam("beerStyle", beerStyle)
+                        .queryParam("showInventoryOnHand", showInventoryOnHand)
+                        .build()
+        ).retrieve().bodyToFlux(BeerDTO.class);
     }
 
     @Override

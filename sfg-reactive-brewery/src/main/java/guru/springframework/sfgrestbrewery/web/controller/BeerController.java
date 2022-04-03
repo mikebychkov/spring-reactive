@@ -6,14 +6,11 @@ import guru.springframework.sfgrestbrewery.web.model.BeerPagedList;
 import guru.springframework.sfgrestbrewery.web.model.BeerStyleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.UUID;
 
 /**
  * Created by jt on 2019-04-20.
@@ -30,26 +27,40 @@ public class BeerController {
 
     @GetMapping(produces = { "application/json" }, path = "beer")
     public ResponseEntity<Mono<BeerPagedList>> listBeers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+                                                         @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                         @RequestParam(value = "beerName", required = false) String beerName,
+                                                         @RequestParam(value = "beerStyle", required = false) BeerStyleEnum beerStyle,
+                                                         @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand) {
+
+//        if (showInventoryOnHand == null) {
+//            showInventoryOnHand = false;
+//        }
+//
+//        if (pageNumber == null || pageNumber < 0){
+//            pageNumber = DEFAULT_PAGE_NUMBER;
+//        }
+//
+//        if (pageSize == null || pageSize < 1) {
+//            pageSize = DEFAULT_PAGE_SIZE;
+//        }
+//
+//        BeerPagedList beerList = beerService.listBeers(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand);
+//
+//        return ResponseEntity.ok(Mono.just(beerList));
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(produces = { "application/json" }, path = "beer-flux")
+    public ResponseEntity<Flux<BeerDto>> listBeersFlux(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
                                                    @RequestParam(value = "pageSize", required = false) Integer pageSize,
                                                    @RequestParam(value = "beerName", required = false) String beerName,
                                                    @RequestParam(value = "beerStyle", required = false) BeerStyleEnum beerStyle,
-                                                   @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand) {
+                                                   @RequestParam(value = "showInventoryOnHand", required = false, defaultValue = "false") Boolean showInventoryOnHand) {
 
-        if (showInventoryOnHand == null) {
-            showInventoryOnHand = false;
-        }
+        Flux<BeerDto> beerFlux = beerService.listBeersFlux(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand);
 
-        if (pageNumber == null || pageNumber < 0){
-            pageNumber = DEFAULT_PAGE_NUMBER;
-        }
-
-        if (pageSize == null || pageSize < 1) {
-            pageSize = DEFAULT_PAGE_SIZE;
-        }
-
-        BeerPagedList beerList = beerService.listBeers(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand);
-
-        return ResponseEntity.ok(Mono.just(beerList));
+        return ResponseEntity.ok(beerFlux);
     }
 
     @GetMapping("beer/{beerId}")
@@ -59,7 +70,6 @@ public class BeerController {
         if (showInventoryOnHand == null) {
             showInventoryOnHand = false;
         }
-        //return ResponseEntity.ok(Mono.just(beerService.getById(beerId, showInventoryOnHand)));
         return ResponseEntity.ok(beerService.getById(beerId, showInventoryOnHand));
     }
 
@@ -75,16 +85,12 @@ public class BeerController {
         BeerDto savedBeer = beerService.saveNewBeer(beerDto);
 
         return ResponseEntity.ok(Mono.just(savedBeer));
-
-//        return ResponseEntity
-//                .created(UriComponentsBuilder
-//                        .fromHttpUrl("http://api.springframework.guru/api/v1/beer/" + savedBeer.getId().toString())
-//                        .build().toUri())
-//                .build();
     }
 
     @PutMapping("beer/{beerId}")
     public ResponseEntity<Void> updateBeerById(@PathVariable("beerId") Long beerId, @RequestBody @Validated BeerDto beerDto) {
+
+        // TODO
 
         return ResponseEntity.noContent().build();
     }

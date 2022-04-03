@@ -2,7 +2,6 @@ package guru.springframework.sfgrestbrewery.services;
 
 import guru.springframework.sfgrestbrewery.domain.Beer;
 import guru.springframework.sfgrestbrewery.repositories.BeerRepository;
-import guru.springframework.sfgrestbrewery.web.controller.NotFoundException;
 import guru.springframework.sfgrestbrewery.web.mappers.BeerMapper;
 import guru.springframework.sfgrestbrewery.web.model.BeerDto;
 import guru.springframework.sfgrestbrewery.web.model.BeerPagedList;
@@ -12,13 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Created by jt on 2019-04-20.
@@ -74,6 +71,29 @@ public class BeerServiceImpl implements BeerService {
 //        }
 
         return beerPagedList;
+    }
+
+    @Cacheable(cacheNames = "beerListCache", condition = "#showInventoryOnHand == false ")
+    @Override
+    public Flux<BeerDto> listBeersFlux(String beerName, BeerStyleEnum beerStyle, Pageable pageable, Boolean showInventoryOnHand) {
+
+        Flux<Beer> beerFlux;
+
+        if (!StringUtils.isEmpty(beerName) && !StringUtils.isEmpty(beerStyle)) {
+            beerFlux = beerRepository.findAllByBeerNameAndBeerStyle(beerName, beerStyle, pageable);
+        } else if (!StringUtils.isEmpty(beerName) && StringUtils.isEmpty(beerStyle)) {
+            beerFlux = beerRepository.findAllByBeerName(beerName, pageable);
+        } else if (StringUtils.isEmpty(beerName) && !StringUtils.isEmpty(beerStyle)) {
+            beerFlux = beerRepository.findAllByBeerStyle(beerStyle, pageable);
+        } else {
+            beerFlux = beerRepository.findAllBy(pageable);
+        }
+
+        if (showInventoryOnHand){
+            return beerFlux.map(beerMapper::beerToBeerDtoWithInventory);
+        } else {
+            return beerFlux.map(beerMapper::beerToBeerDto);
+        }
     }
 
     @Cacheable(cacheNames = "beerCache", key = "#beerId", condition = "#showInventoryOnHand == false ")
