@@ -113,14 +113,18 @@ public class BeerServiceImpl implements BeerService {
     @Override
     public Mono<BeerDto> updateBeer(Long beerId, BeerDto beerDto) {
 
-        Beer beer = beerRepository.findById(beerId).blockOptional().orElseThrow(NotFoundException::new);
-
-        beer.setBeerName(beerDto.getBeerName());
-        beer.setBeerStyle(BeerStyleEnum.PILSNER.valueOf(beerDto.getBeerStyle()));
-        beer.setPrice(beerDto.getPrice());
-        beer.setUpc(beerDto.getUpc());
-
-        return beerRepository.save(beer).map(beerMapper::beerToBeerDto);
+        return beerRepository.findById(beerId)
+                .defaultIfEmpty(Beer.builder().build())
+                .map(beer -> {
+                    beer.setBeerName(beerDto.getBeerName());
+                    beer.setBeerStyle(BeerStyleEnum.valueOf(beerDto.getBeerStyle()));
+                    beer.setPrice(beerDto.getPrice());
+                    beer.setUpc(beerDto.getUpc());
+                    return beer;
+                }).flatMap(beer -> {
+                    if (beer.getId() != null) return beerRepository.save(beer);
+                    return Mono.just(beer);
+                }).map(beerMapper::beerToBeerDto);
     }
 
     @Cacheable(cacheNames = "beerUpcCache")
@@ -133,6 +137,6 @@ public class BeerServiceImpl implements BeerService {
     @Override
     public void deleteBeerById(Long beerId) {
 
-        beerRepository.deleteById(beerId);
+        beerRepository.deleteById(beerId).subscribe();
     }
 }

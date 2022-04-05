@@ -51,6 +51,7 @@ class BeerControllerTest {
 //                .baseUrl(BASE_URL)
 //                .build();
         validBeer = BeerDto.builder()
+                .id(1L)
                 .beerName("Test beer")
                 .beerStyle("PALE_ALE")
                 .upc(BeerLoader.BEER_1_UPC)

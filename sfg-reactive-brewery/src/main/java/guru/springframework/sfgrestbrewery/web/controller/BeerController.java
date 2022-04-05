@@ -11,6 +11,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by jt on 2019-04-20.
@@ -68,7 +72,41 @@ public class BeerController {
         if (showInventoryOnHand == null) {
             showInventoryOnHand = false;
         }
-        return ResponseEntity.ok(beerService.getById(beerId, showInventoryOnHand));
+
+        Mono<BeerDto> rsl = beerService.getById(beerId, showInventoryOnHand);
+
+
+        // VERSION 1
+
+//        AtomicBoolean aBool = new AtomicBoolean(false);
+//        rsl.hasElement().subscribe(aBool::set);
+//        if (aBool.get()) {
+//            return ResponseEntity.ok(rsl);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+
+        // VERSION 2
+
+//        AtomicBoolean aBool = new AtomicBoolean(false);
+//        rsl.hasElement().subscribe(aBool::set);
+//        if (!aBool.get()) {
+//            throw new NotFoundException();
+//        }
+
+        // VERSION 3
+
+        return ResponseEntity.ok(
+                rsl.defaultIfEmpty(BeerDto.builder().build())
+                        .doOnNext(beerDto -> {
+                            if (beerDto.getId() == null) throw new NotFoundException();
+                        })
+        );
+    }
+
+    @ExceptionHandler
+    ResponseEntity<Void> handleNotFound(NotFoundException ex){
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("beerUpc/{upc}")
@@ -86,11 +124,20 @@ public class BeerController {
     }
 
     @PutMapping("beer/{beerId}")
+    //public ResponseEntity<Mono<BeerDto>> updateBeerById(@PathVariable("beerId") Long beerId, @RequestBody @Validated BeerDto beerDto) {
     public ResponseEntity<Void> updateBeerById(@PathVariable("beerId") Long beerId, @RequestBody @Validated BeerDto beerDto) {
 
-        beerService.updateBeer(beerId, beerDto);
+        //return ResponseEntity.ok(beerService.updateBeer(beerId, beerDto));
 
-        return ResponseEntity.noContent().build();
+        AtomicBoolean aBool = new AtomicBoolean(false);
+
+        beerService.updateBeer(beerId, beerDto).map(bd -> bd.getId() == null).subscribe(aBool::set);
+
+        if (aBool.get()) {
+            throw new NotFoundException();
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("beer/{beerId}")
@@ -98,7 +145,7 @@ public class BeerController {
 
         beerService.deleteBeerById(beerId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
 }
