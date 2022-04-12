@@ -21,9 +21,13 @@ public interface BeerService {
 
     Mono<BeerDto> saveNewBeer(BeerDto beerDto);
 
+    Mono<BeerDto> saveNewBeerMono(Mono<BeerDto> beerDto);
+
     Mono<BeerDto> updateBeer(Long beerId, BeerDto beerDto);
 
     Mono<BeerDto> getByUpc(String upc);
 
-    void deleteBeerById(Long beerId);
+    Mono<Void> deleteBeerById(Long beerId);
+
+    Mono<Void> deleteBeerByIdReactive(Long beerId);
 }

@@ -143,7 +143,7 @@ public class BeerController {
     @DeleteMapping("beer/{beerId}")
     public ResponseEntity<Void> deleteBeerById(@PathVariable("beerId") Long beerId) {
 
-        beerService.deleteBeerById(beerId);
+        beerService.deleteBeerById(beerId).subscribe();
 
         return ResponseEntity.ok().build();
     }
