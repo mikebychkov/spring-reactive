@@ -2,18 +2,73 @@ package spring.example.beerclient;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
+import reactor.util.function.Tuples;
 
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Slf4j
 public class ReactorLearningMain {
 
     public static void main(String[] args) {
-        fun();
+        //fun();
+        //funGenerateStream();
+        funTime();
+    }
+
+    private static void funTime() {
+
+        Flux.range(1,100).delayElements(Duration.ofMillis(100)).elapsed().subscribe(t -> log.info("Elapsed {}: {}", t.getT1(), t.getT2()));
+
+        //Flux.range(1,1000).para
+
+        try {
+            Thread.sleep(5000);
+        } catch (Exception ignored) {}
+
+    }
+
+    private static void funGenerateStream() {
+
+        Flux.push(sink -> {
+                    IntStream.range(1000, 2000)
+                            .forEach(sink::next);
+                })
+        //.delayElements(Duration.ofMillis(1))
+        .take(10)
+        .subscribe(e -> log.info("onNext: {}", e));
+
+        //=========================================================================================
+        log.info("=".repeat(100));
+
+        Flux.generate(
+                () -> Tuples.of(0L, 1L),
+                (state, sink) -> {
+                    log.info("Sink value: {}", state.getT2());
+                    sink.next(state.getT2());
+                    long nextValue = state.getT1() + state.getT2();
+                    return Tuples.of(state.getT2(), nextValue);
+                })
+        //.delayElements(Duration.ofMillis(1))
+        .take(10)
+        .subscribe(e -> log.info("onNext: {}", e));
+
+        //=========================================================================================
+        log.info("=".repeat(100));
+
+        //Flux.range(1, 100).onError
+
+        //=========================================================================================
+        log.info("=".repeat(100));
+
+        try {
+            Thread.sleep(5000);
+        } catch (Exception ignored) {}
+
     }
 
     private static void fun() {
